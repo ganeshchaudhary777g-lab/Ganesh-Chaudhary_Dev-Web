@@ -95,6 +95,13 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 app.Services.GetRequiredService<AdmissionStore>().Initialize();
+var bootUser = Environment.GetEnvironmentVariable("ADMIN_USERNAME");
+var bootPass = Environment.GetEnvironmentVariable("ADMIN_PASSWORD");
+if (!string.IsNullOrWhiteSpace(bootUser) && !string.IsNullOrEmpty(bootPass))
+{
+    try { app.Services.GetRequiredService<AdmissionStore>().CreateAdmin(bootUser, bootPass); }
+    catch (Exception) { }
+}
 app.UseForwardedHeaders();
 if (!app.Environment.IsDevelopment()) app.UseHsts();
 app.Use(async (context, next) =>
@@ -307,3 +314,4 @@ static string ReadHiddenPassword()
 }
 
 public sealed record TrackRequest(string? ApplicationNumber, string? MobileNumber);
+
